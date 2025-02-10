@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elden Ring Weapons</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-gray-100" x-data="weaponsData()">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-yellow-500">Elden Ring Weapons</h1>
+        
+        <!-- Filtres -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <input 
+                    type="text" 
+                    x-model="searchTerm" 
+                    placeholder="Rechercher une arme..."
+                    class="w-full px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:border-yellow-500"
+                >
+            </div>
+            <div>
+                <select 
+                    x-model="filterDLC" 
+                    class="w-full px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:border-yellow-500"
+                >
+                    <option value="all">Tous</option>
+                    <option value="true">DLC uniquement</option>
+                    <option value="false">Base Game uniquement</option>
+                </select>
+            </div>
+            <div>
+                <select 
+                    x-model="filterCategory" 
+                    class="w-full px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:border-yellow-500"
+                >
+                    <option value="all">Toutes les catégories</option>
+                    <template x-for="category in categories" :key="category">
+                        <option :value="category" x-text="category"></option>
+                    </template>
+                </select>
+            </div>
+            <div>
+                <select 
+                    x-model="sortBy" 
+                    class="w-full px-4 py-2 rounded bg-gray-800 text-gray-100 border border-gray-700 focus:outline-none focus:border-yellow-500"
+                >
+                    <option value="name">Nom</option>
+                    <option value="physical_attack">Attaque Physique</option>
+                    <option value="magic_attack">Attaque Magique</option>
+                    <option value="fire_attack">Attaque Feu</option>
+                    <option value="lightning_attack">Attaque Foudre</option>
+                    <option value="holy_attack">Attaque Sacré</option>
+                    <option value="weight">Poids</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="overflow-x-auto rounded-lg border border-gray-700">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Image</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nom</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Attaque</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Défense</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Scaling</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prérequis</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Autres</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Compétence</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-gray-900 divide-y divide-gray-700">
+                    <template x-for="weapon in filteredWeapons" :key="weapon.id">
+                        <tr class="hover:bg-gray-800 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <img :src="'https://eldenring.wiki.fextralife.com' + weapon.image_url" :alt="weapon.name" class="h-12 w-12 object-cover">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <span x-text="weapon.name" class="text-sm font-medium"></span>
+                                    <span x-show="weapon.is_dlc" class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-gray-900">DLC</span>
+                                    <span class="ml-2 text-xs text-gray-500" x-text="'(' + weapon.type + ')'"></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div class="text-gray-100">Phy: <span x-text="weapon.physical_attack"></span></div>
+                                    <div class="text-blue-400">Mag: <span x-text="weapon.magic_attack"></span></div>
+                                    <div class="text-orange-400">Feu: <span x-text="weapon.fire_attack"></span></div>
+                                    <div class="text-yellow-400">Foudre: <span x-text="weapon.lightning_attack"></span></div>
+                                    <div class="text-yellow-200">Sacré: <span x-text="weapon.holy_attack"></span></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div class="text-gray-100">Phy: <span x-text="weapon.physical_defense"></span></div>
+                                    <div class="text-blue-400">Mag: <span x-text="weapon.magic_defense"></span></div>
+                                    <div class="text-orange-400">Feu: <span x-text="weapon.fire_defense"></span></div>
+                                    <div class="text-yellow-400">Foudre: <span x-text="weapon.lightning_defense"></span></div>
+                                    <div class="text-yellow-200">Sacré: <span x-text="weapon.holy_defense"></span></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div>For: <span x-text="weapon.strength_scaling"></span></div>
+                                    <div>Dex: <span x-text="weapon.dexterity_scaling"></span></div>
+                                    <div>Int: <span x-text="weapon.intelligence_scaling"></span></div>
+                                    <div>Foi: <span x-text="weapon.faith_scaling"></span></div>
+                                    <div>Arc: <span x-text="weapon.arcane_scaling"></span></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div>For: <span x-text="weapon.strength_requirement"></span></div>
+                                    <div>Dex: <span x-text="weapon.dexterity_requirement"></span></div>
+                                    <div>Int: <span x-text="weapon.intelligence_requirement"></span></div>
+                                    <div>Foi: <span x-text="weapon.faith_requirement"></span></div>
+                                    <div>Arc: <span x-text="weapon.arcane_requirement"></span></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div>Crit: <span x-text="weapon.critical_hit"></span></div>
+                                    <div>Guard: <span x-text="weapon.guard_boost"></span></div>
+                                    <div>Poids: <span x-text="weapon.weight"></span></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    <div x-text="weapon.skill_name"></div>
+                                    <div>FP: <span x-text="weapon.skill_fp"></span></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function weaponsData() {
+            return {
+                weapons: [],
+                searchTerm: '',
+                filterDLC: 'all',
+                filterCategory: 'all',
+                sortBy: 'name',
+                categories: [],
+                
+                async init() {
+                    const response = await fetch('/api/weapons');
+                    this.weapons = await response.json();
+                    // Log pour voir les types d'armes dans les données
+                    console.log("Types d'armes disponibles:", this.weapons.map(w => w.type));
+                    // Extraire les catégories uniques
+                    this.categories = [...new Set(this.weapons.map(w => w.type))].sort();
+                    console.log("Catégories filtrées:", this.categories);
+                },
+                
+                get filteredWeapons() {
+                    return this.weapons
+                        .filter(weapon => {
+                            const matchesSearch = weapon.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+                            const matchesDLC = this.filterDLC === 'all' ? true : 
+                                             this.filterDLC === 'true' ? weapon.is_dlc : 
+                                             !weapon.is_dlc;
+                            // Log pour déboguer le filtre de catégorie
+                            console.log("Comparing:", {
+                                weaponType: weapon.type,
+                                filterCategory: this.filterCategory,
+                                matches: this.filterCategory === 'all' || weapon.type === this.filterCategory
+                            });
+                            const matchesCategory = this.filterCategory === 'all' || 
+                                                  (weapon.type && weapon.type.toLowerCase() === this.filterCategory.toLowerCase());
+                            return matchesSearch && matchesDLC && matchesCategory;
+                        })
+                        .sort((a, b) => {
+                            if (this.sortBy === 'name') {
+                                return a.name.localeCompare(b.name);
+                            }
+                            return b[this.sortBy] - a[this.sortBy];
+                        });
+                }
+            }
+        }
+    </script>
+</body>
+</html> 
